@@ -38,11 +38,11 @@ setImmediate(function () {
             string['equals'].implementation = function (arg) {
                 if (className == '') {
                     if (!isDefault()) {
-                        send('"' + arg + '".equals("' + this + '")')
+                        send('"' + this + '".equals("' + arg + '")')
                     }
                 }
                 if (className != '' && getClassName().indexOf(className) == 0) {
-                    send('"' + arg + '".equals("' + this + '")')
+                    send('"' + this + '".equals("' + arg + '")')
                 }
                 let ret = this['equals'](arg);
                 return ret

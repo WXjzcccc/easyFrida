@@ -9,7 +9,7 @@ def onMessage(message,data):
     if message['type'] == 'send':
         print_yellow(message['payload'])
     elif message['type'] == 'error':
-        print_red(message['description'])
+        print_red(message)
     else:
         print(message)
 
@@ -103,9 +103,14 @@ if __name__ == '__main__':
             javaEnc(process,onMessage)
         elif plugin == 'event':
             hook_event(process,onMessage)
+        elif plugin == 'database':
+            sqlcipher(process)
+        elif plugin == 'share':
+            shareP(process)
     else:
         print_red('请选择插件')
         sys.exit()
     in_data = sys.stdin.readline()
     if in_data in ['exit','quit']:
         sys.exit(0)
+# TODO 多进程与加固？至少需要支持加固
