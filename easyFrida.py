@@ -2,7 +2,8 @@ import frida
 import sys
 import argparse
 from tools.PrintTool import print_yellow,print_red,print_green,print_dict
-from hooks.equals import hook_equals
+from hooks.hooks import *
+import rich
 
 def onMessage(message,data):
     if message['type'] == 'send':
@@ -50,15 +51,12 @@ def get_device(name=''):
 
 if __name__ == '__main__':
     description = '''
-                               ____                 __              
-                              /\  _`\        __    /\ \             
-   __     __      ____  __  __\ \ \L\_\_ __ /\_\   \_\ \     __     
- /'__`\ /'__`\   /',__\/\ \/\ \\ \  _\/\`'__\/\ \  /'_` \  /'__`\   
-/\  __//\ \L\.\_/\__, `\ \ \_\ \\ \ \/\ \ \/ \ \ \/\ \L\ \/\ \L\.\_ 
-\ \____\ \__/.\_\/\____/\/`____ \\ \_\ \ \_\  \ \_\ \___,_\ \__/.\_\
- \/____/\/__/\/_/\/___/  `/___/> \\/_/  \/_/   \/_/\/__,_ /\/__/\/_/
-                            /\___/                                  
-                            \/__/                                   Author: WXjzc'''
+                       _____     _     _       
+   ___  __ _ ___ _   _|  ___| __(_) __| | __ _ 
+  / _ \/ _` / __| | | | |_ | '__| |/ _` |/ _` |
+ |  __/ (_| \__ \ |_| |  _|| |  | | (_| | (_| |
+  \___|\__,_|___/\__, |_|  |_|  |_|\__,_|\__,_|
+                 |___/                         Author: WXjzc'''
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,description=description)
     parser.add_argument('-R',action='store_true',help='使用远程连接方式')
     parser.add_argument('-S',type=str,default='',help='要附加的设备名(仅在连接了多台设备时需要)')
@@ -69,7 +67,7 @@ if __name__ == '__main__':
     parser.add_argument('--plugin',type=str,help='要执行的插件')
     parser.add_argument('-l',action='store_true',help='列出支持的插件')
     args = parser.parse_args()
-    print(description)
+    rich.print(description)
     className = ''
     packageName = ''
     if check_arg(args.l):
@@ -99,6 +97,12 @@ if __name__ == '__main__':
         plugin = args.plugin
         if plugin == 'equals':
             hook_equals(process,onMessage,className=className)
+        elif plugin == 'r0capture':
+            r0capture(process)
+        elif plugin == 'javaEnc':
+            javaEnc(process,onMessage)
+        elif plugin == 'event':
+            hook_event(process,onMessage)
     else:
         print_red('请选择插件')
         sys.exit()
