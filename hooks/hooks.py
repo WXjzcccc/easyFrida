@@ -63,8 +63,28 @@ def hook_event(process,onMessage):
     script.load()
 
 def dbMessage(message,data):
+    def find_all_occurrences(string, char):
+        positions = []
+        for i in range(len(string)):
+            if string[i] == char:
+                positions.append(i)
+        return positions
     if message['type'] == 'send':
-        print_yellow(message['payload'])
+        payload = message['payload']
+        if type(payload) == dict:
+            if payload['type'] == 'sql':
+                sql = payload['sql']
+                args = payload['args']
+                positions = find_all_occurrences(sql, '?')
+                tmp = list(sql)
+                for i in range(len(positions)):
+                    tmp[positions[i]] = args[i]
+                sql = ''.join(tmp)
+                print_red(f'↓↓↓↓↓↓↓↓↓↓↓执行了sql↓↓↓↓↓↓↓↓↓↓↓')
+                print_yellow(sql)
+                print_red(f'↑↑↑↑↑↑↑↑↑↑↑执行了sql↑↑↑↑↑↑↑↑↑↑↑')
+        else:
+            print_yellow(message['payload'])
     elif message['type'] == 'error':
         pass
     else:
