@@ -4,6 +4,7 @@ import argparse
 from tools.PrintTool import print_yellow,print_red,print_green,print_dict
 from hooks.hooks import *
 import rich
+import threading
 
 def onMessage(message,data):
     if message['type'] == 'send':
@@ -37,6 +38,43 @@ def spawn(device,package_name):
     except:
         print_red('附加失败')
         sys.exit()
+
+my_func = None
+
+def spawnNew(device,package_name):
+    pending = []
+    sessions = []
+    scripts = []
+    event = threading.Event()
+    def spawn_added(spawn):
+        print('spawn_added:', spawn)
+        event.set()
+        if(spawn.identifier.startswith(package_name)):
+            session = device.attach(spawn.pid)
+            my_func(session,onMessage)
+            device.resume(spawn.pid)
+    def on_spawned(spawn):
+        print('on_spawned:', spawn)
+        pending.append(spawn)
+        event.set() 
+    def spawn_removed(spawn):
+        print('spawn_added:', spawn)
+        event.set()
+    device.on('spawn-added', spawn_added)
+    device.on('spawn-removed', spawn_removed)
+    device.on('child-added', on_spawned)
+    device.on('child-removed', on_spawned)
+    device.on('process-crashed', on_spawned)
+    device.on('output', on_spawned)
+    device.on('uninjected', on_spawned)
+    device.on('lost', on_spawned)
+    device.enable_spawn_gating()
+    event = threading.Event()
+    pid = device.spawn([package_name])
+    session = device.attach(pid)
+    print("[*] Attach Application id:",pid)
+    device.resume(pid)
+    return device,session,pid
 
 def get_device(name=''):
     try:
@@ -89,24 +127,33 @@ if __name__ == '__main__':
         className = args.className
     if check_arg(args.f):
         packageName = args.f
-        device,process,pid = spawn(device,packageName)
+        device,process,pid = spawnNew(device,packageName)
     if check_arg(args.p):
         pnameorid = args.p
         process = attach(device,pnameorid)
     if check_arg(args.plugin):
         plugin = args.plugin
         if plugin == 'equals':
+            my_func = hook_equals
             hook_equals(process,onMessage,className=className)
         elif plugin == 'r0capture':
+            my_func = r0capture
             r0capture(process)
         elif plugin == 'javaEnc':
+            my_func = javaEnc
             javaEnc(process,onMessage)
         elif plugin == 'event':
+            my_func = hook_event
             hook_event(process,onMessage)
         elif plugin == 'database':
+            my_func = sqlcipher
             sqlcipher(process)
         elif plugin == 'share':
+            my_func = shareP
             shareP(process)
+        elif plugin == 'sofileopen':
+            my_func = soFile
+            soFile(process)
     else:
         print_red('请选择插件')
         sys.exit()

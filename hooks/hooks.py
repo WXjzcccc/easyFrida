@@ -12,6 +12,7 @@ def javaEnc(process,onMessage):
     script.on('message',onMessage)
     script.load()
 
+_className = ''
 def hook_equals(process,onMessage,className=''):
     '''
     @process:       附加的进程
@@ -23,7 +24,10 @@ def hook_equals(process,onMessage,className=''):
     script = process.create_script(jsCode)
     script.on('message',onMessage)
     script.load()
-    script.post(className)
+    if className != '':
+        global _className 
+        _className= className
+    script.post(_className)
 
 
 def num_to_ip(num):
@@ -43,7 +47,7 @@ def r0Message(message,data):
     else:
         print(message)
 
-def r0capture(process):
+def r0capture(process,onMessage=''):
     '''
     @process:       附加的进程
     @onMessage:     消息回调函数
@@ -71,7 +75,7 @@ def dbMessage(message,data):
         return positions
     if message['type'] == 'send':
         payload = message['payload']
-        if type(payload) == dict:
+        if type(payload) == dict and 'type' in payload.keys():
             if payload['type'] == 'sql':
                 sql = payload['sql']
                 args = payload['args']
@@ -90,7 +94,7 @@ def dbMessage(message,data):
     else:
         print(message)
 
-def sqlcipher(process):
+def sqlcipher(process,onMessage=''):
     with open('scripts/sqlcipher.js','r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
@@ -109,9 +113,28 @@ def shareMessage(message,data):
     else:
         print(message)
 
-def shareP(process):
+def shareP(process,onMessage=''):
     with open('scripts/SharedPreferences.js','r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',shareMessage)
+    script.load()
+
+
+def fileMessage(message,data):
+    if message['type'] == 'send':
+        payload = message['payload']
+        if type(payload) == dict and 'type' in payload.keys():
+            if payload['type'] == 'module open':
+                print_yellow(payload)
+        else:
+            print_yellow(payload)
+    else:
+        print_red(message)
+
+def soFile(process,onMessage=''):
+    with open('scripts/file.js','r',encoding='utf8') as fr:
+        jsCode = fr.read()
+    script = process.create_script(jsCode)
+    script.on('message',fileMessage)
     script.load()

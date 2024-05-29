@@ -62,14 +62,18 @@ setImmediate(function () {
             let sqliteDB = Java.use("android.database.sqlite.SQLiteDatabase");
             sqliteDB["execSQL"].overload('java.lang.String', '[Ljava.lang.Object;').implementation = function (str, objArr) {
                 this["execSQL"](str, objArr);
+                var args = [];
+                for(var i=0;i<objArr.length;i++){
+                    args.push(objArr[i].toString());
+                }
                 var res = {
                     'type': 'sql',
                     'sql':str,
-                    'args':objArr
+                    'args':args
                 }
                 send(res);
             };
-            sqliteDB["execSQL"].overload('java.lang.String').implementation = function (str, objArr) {
+            sqliteDB["execSQL"].overload('java.lang.String').implementation = function (str) {
                 this["execSQL"](str, objArr);
                 var res = {
                     'type': 'sql',
@@ -78,44 +82,35 @@ setImmediate(function () {
                 }
                 send(res);
             };
-            sqliteDB["query"].overload("java.lang.String", "[Ljava.lang.String;", "java.lang.String", "[Ljava.lang.String;", "java.lang.String", "java.lang.String", "java.lang.String").implementation = function (args) {
-                this["query"](args);
-                var res = {
-                    'type': 'sql',
-                    'sql':args[0],
-                    'args':args[1]
-                }
-                send(res);
-            };
+            // sqliteDB['query'].overload('java.lang.String', '[Ljava.lang.String;', 'java.lang.String', '[Ljava.lang.String;', 'java.lang.String', 'java.lang.String', 'java.lang.String').implementation = function(arg0,arg1,arg2,arg3,arg4,arg5,arg6){
+            //     console.log(arg0,arg1,arg2,arg3,arg4,arg5,arg6)
+            //     this['query'](arg0,arg1,arg2,arg3,arg4,arg5,arg6)
+            // }
+            // sqliteDB['query'].overload('java.lang.String', '[Ljava.lang.String;', 'java.lang.String', '[Ljava.lang.String;', 'java.lang.String', 'java.lang.String', 'java.lang.String', 'java.lang.String').implementation = function(arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7){
+            //     this['query'](arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7)
+            // }
+            // sqliteDB['query'].overload('boolean', 'java.lang.String', '[Ljava.lang.String;', 'java.lang.String', '[Ljava.lang.String;', 'java.lang.String', 'java.lang.String', 'java.lang.String', 'java.lang.String').implementation = function(arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8){
+            //     this['query'](arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8)
+            // }
+            // sqliteDB['query'].overload('boolean', 'java.lang.String', '[Ljava.lang.String;', 'java.lang.String', '[Ljava.lang.String;', 'java.lang.String', 'java.lang.String', 'java.lang.String', 'java.lang.String', 'android.os.CancellationSignal').implementation = function(arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9){
+            //     this['query'](arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9)
+            // }
             sqliteDB["getPath"].implementation = function () {
                 var ret = this["getPath"]();
                 send('数据库文件：'+ret);
                 return ret
             };
-            let SQLiteProgram1 = Java.use("android.database.sqlite.SQLiteProgram");
-            SQLiteProgram1["bind_string"].implementation = function (i, str) {
-                send(`绑定第_${i}_个参数，值为:${str}=====>${this.mCompiledSql.value.mSqlStmt.value}`)
-                this["bind_string"](i, str);
-            };
-            SQLiteProgram1["bind_double"].implementation = function (i, d) {
-                send(`绑定第_${i}_个参数，值为:${str}=====>${this.mCompiledSql.value.mSqlStmt.value}`)
-                this["bind_double"](i, d);
-            };
-            SQLiteProgram1["bind_long"].implementation = function (i, j) {
-                send(`绑定第_${i}_个参数，值为:${str}=====>${this.mCompiledSql.value.mSqlStmt.value}`)
-                this["bind_long"](i, j);
-            };
-            SQLiteProgram1["bind_null"].implementation = function (i) {
-                send(`绑定第_${i}_个参数，值为:${str}=====>${this.mCompiledSql.value.mSqlStmt.value}`)
-                this["bind_null"](i);
-            };
-            SQLiteProgram1["bind_blob"].implementation = function (i, bArr) {
-                send(`绑定第_${i}_个参数，值为:${str}=====>${this.mCompiledSql.value.mSqlStmt.value}`)
-                this["bind_blob"](i, bArr);
-            };
         }
-        netSqlcipher()
-        _sqlite()
+        try{
+            netSqlcipher();
+        }catch(e){
+            console.log(e)
+        }
+        try{
+            _sqlite();
+        }catch(e){
+            console.log(e)
+        }
         // TODO 需要支持其他包
     });
 })
