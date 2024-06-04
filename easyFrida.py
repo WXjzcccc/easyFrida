@@ -136,6 +136,9 @@ if __name__ == '__main__':
         if plugin == 'equals':
             my_func = hook_equals
             hook_equals(process,onMessage,className=className)
+        elif plugin == 'strcmp':
+            my_func = hook_strcmp
+            hook_strcmp(process,onMessage,className=className)
         elif plugin == 'r0capture':
             my_func = r0capture
             r0capture(process)
@@ -154,6 +157,9 @@ if __name__ == '__main__':
         elif plugin == 'sofileopen':
             my_func = soFile
             soFile(process)
+        elif plugin == 'log':
+            my_func = hook_log
+            hook_log(process)
     else:
         print_red('请选择插件')
         sys.exit()

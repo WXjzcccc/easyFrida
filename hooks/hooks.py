@@ -29,6 +29,40 @@ def hook_equals(process,onMessage,className=''):
         _className= className
     script.post(_className)
 
+def hook_strcmp(process,onMessage,className=''):
+    '''
+    @process:       附加的进程
+    @onMessage:     消息回调函数
+    @className:     需要过滤的类名，默认为空
+    '''
+    with open('scripts/strcmp.js','r',encoding='utf8') as fr:
+        jsCode = fr.read()
+    script = process.create_script(jsCode)
+    script.on('message',onMessage)
+    script.load()
+    if className != '':
+        global _className 
+        _className= className
+    script.post(_className)
+
+def logMessage(message,data):
+    if message['type'] == 'send':
+        payload = message['payload']  
+        tag = payload['TAG']
+        format = payload['format'] if 'format' in payload.keys() is not None else ''
+        args = payload['args']
+        print_yellow(f'{tag}:{format}<-{args}')
+    elif message['type'] == 'error':
+        print_red(message['description'])
+    else:
+        print(message)
+
+def hook_log(process,onMessage=''):
+    with open('scripts/log.js','r',encoding='utf8') as fr:
+        jsCode = fr.read()
+    script = process.create_script(jsCode)
+    script.on('message',logMessage)
+    script.load()
 
 def num_to_ip(num):
     parts = [num >> 24 & 0xff, num >> 16 & 0xff, num >> 8 & 0xff, num & 0xff]
