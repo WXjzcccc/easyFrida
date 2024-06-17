@@ -58,6 +58,15 @@ setImmediate(function () {
                 this["native_bind_blob"](i, bArr);
             };
         }
+        function zeteticSQLCipher(){
+            let SQLiteDatabase = Java.use("net.zetetic.database.sqlcipher.SQLiteDatabase");
+            SQLiteDatabase["openDatabase"].overload('java.lang.String', '[B', 'net.zetetic.database.sqlcipher.SQLiteDatabase$CursorFactory', 'int', 'net.zetetic.database.DatabaseErrorHandler', 'net.zetetic.database.sqlcipher.SQLiteDatabaseHook').implementation = function (str, bArr, cursorFactory, i11, databaseErrorHandler, sQLiteDatabaseHook) {
+                let result = this["openDatabase"](str, bArr, cursorFactory, i11, databaseErrorHandler, sQLiteDatabaseHook);
+                send('数据库密钥(字节数组)：'+bArr+'\t数据库路径：'+str)
+                send('数据库密钥(字符串)：'+Java.use('java.lang.String').$new(bArr)+'\t数据库路径：'+str)
+                return result;
+        };
+        }
         function _sqlite(){
             let sqliteDB = Java.use("android.database.sqlite.SQLiteDatabase");
             sqliteDB["execSQL"].overload('java.lang.String', '[Ljava.lang.Object;').implementation = function (str, objArr) {
@@ -108,6 +117,11 @@ setImmediate(function () {
         }
         try{
             _sqlite();
+        }catch(e){
+            console.log(e)
+        }
+        try{
+            zeteticSQLCipher();
         }catch(e){
             console.log(e)
         }
