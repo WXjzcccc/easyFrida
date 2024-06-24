@@ -24,6 +24,27 @@ Java.perform(function () {
         })
         return this.e(tag + '_hook', msg);
     };
+    Log.v.overload("java.lang.String", "java.lang.String").implementation = function (a, b) {
+        send({
+            'TAG': tag,
+            'args': msg
+        })
+        return this.e(tag + '_hook', msg);
+    };
+    Log.i.overload("java.lang.String", "java.lang.String").implementation = function (a, b) {
+        send({
+            'TAG': tag,
+            'args': msg
+        })
+        return this.e(tag + '_hook', msg);
+    };
+    Log.w.overload("java.lang.String", "java.lang.String").implementation = function (a, b) {
+        send({
+            'TAG': tag,
+            'args': msg
+        })
+        return this.e(tag + '_hook', msg);
+    };
     var addr = Module.findExportByName("liblog.so", "__android_log_print");
     Interceptor.attach(addr, {
         onEnter: function (args) {

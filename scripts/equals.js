@@ -47,12 +47,32 @@ setImmediate(function () {
                 let ret = this['equals'](arg);
                 return ret
             }
+            
         }
+
+        function hook_equalsIgnoreCase(className='') {
+            let string = Java.use("java.lang.String")
+            string['equalsIgnoreCase'].implementation = function (arg) {
+                if (className == '') {
+                    if (!isDefault()) {
+                        send('"' + this + '".equalsIgnoreCase("' + arg + '")')
+                    }
+                }
+                if (className != '' && getClassName().indexOf(className) == 0) {
+                    send('"' + this + '".equalsIgnoreCase("' + arg + '")')
+                }
+                let ret = this['equalsIgnoreCase'](arg);
+                return ret
+            }
+        }
+
         recv(function (className) {
             if (className != '') {
                 hook_equals(className);
+                hook_equalsIgnoreCase(className);
             } else {
                 hook_equals();
+                hook_equalsIgnoreCase();
             }
         })
 
