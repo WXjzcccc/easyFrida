@@ -1,4 +1,5 @@
 import frida
+import os
 import sys
 import argparse
 from tools.PrintTool import print_yellow,print_red,print_green,print_dict
@@ -87,6 +88,11 @@ def get_device(name=''):
         print_red('device not found!')
         sys.exit()
 
+def get_relative_path(relative_path):
+    # 获取配置文件路径
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
+
 if __name__ == '__main__':
     description = '''
                        _____     _     _       
@@ -111,7 +117,7 @@ if __name__ == '__main__':
     if check_arg(args.l):
         lst = []
         idx = 0
-        with open('scripts/plugins.list','r',encoding='utf-8') as f:
+        with open(get_relative_path('scripts/plugins.list'),'r',encoding='utf-8') as f:
             for line in f.readlines():
                 name = line.split(' ')[0]
                 _help = line.split(' ')[1].strip()

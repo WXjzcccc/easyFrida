@@ -1,4 +1,10 @@
 from tools.PrintTool import print_yellow,print_red
+import os
+
+def get_relative_path(relative_path):
+    """获取配置文件的绝对路径"""
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
 
 def javaEnc(process,onMessage):
     '''
@@ -6,7 +12,7 @@ def javaEnc(process,onMessage):
     @onMessage:     消息回调函数
     @className:     需要过滤的类名，默认为空
     '''
-    with open('scripts/javaEnc.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/javaEnc.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',onMessage)
@@ -19,7 +25,7 @@ def hook_equals(process,onMessage,className=''):
     @onMessage:     消息回调函数
     @className:     需要过滤的类名，默认为空
     '''
-    with open('scripts/equals.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/equals.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',onMessage)
@@ -35,7 +41,7 @@ def hook_strcmp(process,onMessage,className=''):
     @onMessage:     消息回调函数
     @className:     需要过滤的类名，默认为空
     '''
-    with open('scripts/strcmp.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/strcmp.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',onMessage)
@@ -58,7 +64,7 @@ def logMessage(message,data):
         print(message)
 
 def hook_log(process,onMessage=''):
-    with open('scripts/log.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/log.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',logMessage)
@@ -87,14 +93,14 @@ def r0capture(process,onMessage=''):
     @onMessage:     消息回调函数
     @className:     需要过滤的类名，默认为空
     '''
-    with open('scripts/r0capture.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/r0capture.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',r0Message)
     script.load()
 
 def hook_event(process,onMessage):
-    with open('scripts/hookEvent.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/hookEvent.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',onMessage)
@@ -129,7 +135,7 @@ def dbMessage(message,data):
         print(message)
 
 def sqlcipher(process,onMessage=''):
-    with open('scripts/sqlcipher.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/sqlcipher.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',dbMessage)
@@ -148,7 +154,7 @@ def shareMessage(message,data):
         print(message)
 
 def shareP(process,onMessage=''):
-    with open('scripts/SharedPreferences.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/SharedPreferences.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',shareMessage)
@@ -167,7 +173,7 @@ def fileMessage(message,data):
         print_red(message)
 
 def soFile(process,onMessage=''):
-    with open('scripts/file.js','r',encoding='utf8') as fr:
+    with open(get_relative_path('../scripts/file.js'),'r',encoding='utf8') as fr:
         jsCode = fr.read()
     script = process.create_script(jsCode)
     script.on('message',fileMessage)
