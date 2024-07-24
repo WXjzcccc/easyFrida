@@ -44,6 +44,9 @@ setImmediate(function () {
                 if (className != '' && getClassName().indexOf(className) == 0) {
                     send('"' + this + '".equals("' + arg + '")')
                 }
+                else if (className != '' && (this==className.toString() | arg==className.toString())) {
+                    send('"' + this + '".equals("' + arg + '")')
+                }
                 let ret = this['equals'](arg);
                 return ret
             }
@@ -59,6 +62,9 @@ setImmediate(function () {
                     }
                 }
                 if (className != '' && getClassName().indexOf(className) == 0) {
+                    send('"' + this + '".equalsIgnoreCase("' + arg + '")')
+                }
+                else if (className != '' && (this==className.toString() | arg==className.toString())) {
                     send('"' + this + '".equalsIgnoreCase("' + arg + '")')
                 }
                 let ret = this['equalsIgnoreCase'](arg);
