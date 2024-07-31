@@ -3,17 +3,17 @@ setImmediate(function () {
         function findAllOccurrences(str, char) {
             var positions = [];
             for (var i = 0; i < str.length; i++) {
-              if (str.charAt(i) === char) {
-                positions.push(i);
-              }
+                if (str.charAt(i) === char) {
+                    positions.push(i);
+                }
             }
             return positions;
-          }
+        }
         function netSqlcipher() {
             let sqliteOpenHelper = Java.use("net.sqlcipher.database.SQLiteOpenHelper")
             sqliteOpenHelper['getWritableDatabase'].overload("java.lang.String").implementation = function (arg) {
                 let ret = this['getWritableDatabase'](arg);
-                send('数据库密钥：'+arg+'\t数据库路径：'+this.mDatabase.value.mPath.value)
+                send('数据库密钥：' + arg + '\t数据库路径：' + this.mDatabase.value.mPath.value)
                 return ret
             }
             let SQLiteQuery = Java.use("net.sqlcipher.database.SQLiteQuery");
@@ -21,8 +21,8 @@ setImmediate(function () {
                 this["$init"](sQLiteDatabase, str, i, strArr);
                 var res = {
                     'type': 'sql',
-                    'sql':str,
-                    'args':strArr
+                    'sql': str,
+                    'args': strArr
                 }
                 send(res);
                 // this["$init"](sQLiteDatabase, str, i, strArr);
@@ -31,8 +31,8 @@ setImmediate(function () {
                 this["$init"](sQLiteDatabase, str, i, objArr);
                 var res = {
                     'type': 'sql',
-                    'sql':str,
-                    'args':objArr
+                    'sql': str,
+                    'args': objArr
                 }
                 send(res);
             };
@@ -58,27 +58,36 @@ setImmediate(function () {
                 this["native_bind_blob"](i, bArr);
             };
         }
-        function zeteticSQLCipher(){
+        function zeteticSQLCipher() {
             let SQLiteDatabase = Java.use("net.zetetic.database.sqlcipher.SQLiteDatabase");
             SQLiteDatabase["openDatabase"].overload('java.lang.String', '[B', 'net.zetetic.database.sqlcipher.SQLiteDatabase$CursorFactory', 'int', 'net.zetetic.database.DatabaseErrorHandler', 'net.zetetic.database.sqlcipher.SQLiteDatabaseHook').implementation = function (str, bArr, cursorFactory, i11, databaseErrorHandler, sQLiteDatabaseHook) {
                 let result = this["openDatabase"](str, bArr, cursorFactory, i11, databaseErrorHandler, sQLiteDatabaseHook);
-                send('数据库密钥(字节数组)：'+bArr+'\t数据库路径：'+str)
-                send('数据库密钥(字符串)：'+Java.use('java.lang.String').$new(bArr)+'\t数据库路径：'+str)
+                send('数据库密钥(字节数组)：' + bArr + '\t数据库路径：' + str)
+                send('数据库密钥(字符串)：' + Java.use('java.lang.String').$new(bArr) + '\t数据库路径：' + str)
                 return result;
-        };
+            };
         }
-        function _sqlite(){
+        function wcdb() {
+            let SQLiteDatabase = Java.use("com.tencent.wcdb.database.SQLiteDatabase");
+            SQLiteDatabase["openDatabase"].overload('java.lang.String', '[B', 'com.tencent.wcdb.database.SQLiteCipherSpec', 'com.tencent.wcdb.database.SQLiteDatabase$CursorFactory', 'int', 'com.tencent.wcdb.DatabaseErrorHandler', 'int').implementation = function (str, bArr, sQLiteCipherSpec, cursorFactory, i, databaseErrorHandler, i2) {
+                let result = this["openDatabase"](str, bArr, sQLiteCipherSpec, cursorFactory, i, databaseErrorHandler, i2);
+                send('数据库密钥(字节数组)：' + bArr + '\t数据库路径：' + str)
+                send('数据库密钥(字符串)：' + Java.use('java.lang.String').$new(bArr) + '\t数据库路径：' + str)
+                return result;
+            };
+        }
+        function _sqlite() {
             let sqliteDB = Java.use("android.database.sqlite.SQLiteDatabase");
             sqliteDB["execSQL"].overload('java.lang.String', '[Ljava.lang.Object;').implementation = function (str, objArr) {
                 this["execSQL"](str, objArr);
                 var args = [];
-                for(var i=0;i<objArr.length;i++){
+                for (var i = 0; i < objArr.length; i++) {
                     args.push(objArr[i].toString());
                 }
                 var res = {
                     'type': 'sql',
-                    'sql':str,
-                    'args':args
+                    'sql': str,
+                    'args': args
                 }
                 send(res);
             };
@@ -86,8 +95,8 @@ setImmediate(function () {
                 this["execSQL"](str, objArr);
                 var res = {
                     'type': 'sql',
-                    'sql':str,
-                    'args':[]
+                    'sql': str,
+                    'args': []
                 }
                 send(res);
             };
@@ -106,24 +115,29 @@ setImmediate(function () {
             // }
             sqliteDB["getPath"].implementation = function () {
                 var ret = this["getPath"]();
-                send('数据库文件：'+ret);
+                send('数据库文件：' + ret);
                 return ret
             };
         }
-        try{
+        try {
             netSqlcipher();
-        }catch(e){
-            console.log(e)
+        } catch (e) {
+            // console.log(e)
         }
-        try{
+        try {
             _sqlite();
-        }catch(e){
-            console.log(e)
+        } catch (e) {
+            // console.log(e)
         }
-        try{
+        try {
             zeteticSQLCipher();
-        }catch(e){
-            console.log(e)
+        } catch (e) {
+            // console.log(e)
+        }
+        try {
+            wcdb()
+        } catch (e) {
+            // console.log(e)
         }
         // TODO 需要支持其他包
     });

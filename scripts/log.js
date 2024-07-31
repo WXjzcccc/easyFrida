@@ -24,21 +24,21 @@ Java.perform(function () {
         })
         return this.e(tag + '_hook', msg);
     };
-    Log.v.overload("java.lang.String", "java.lang.String").implementation = function (a, b) {
+    Log.v.overload("java.lang.String", "java.lang.String").implementation = function (tag, msg) {
         send({
             'TAG': tag,
             'args': msg
         })
         return this.e(tag + '_hook', msg);
     };
-    Log.i.overload("java.lang.String", "java.lang.String").implementation = function (a, b) {
+    Log.i.overload("java.lang.String", "java.lang.String").implementation = function (tag, msg) {
         send({
             'TAG': tag,
             'args': msg
         })
         return this.e(tag + '_hook', msg);
     };
-    Log.w.overload("java.lang.String", "java.lang.String").implementation = function (a, b) {
+    Log.w.overload("java.lang.String", "java.lang.String").implementation = function (tag, msg) {
         send({
             'TAG': tag,
             'args': msg
