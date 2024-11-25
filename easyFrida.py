@@ -9,9 +9,22 @@ import threading
 
 def onMessage(message,data):
     if message['type'] == 'send':
-        print_yellow(message['payload'])
+        outstr = ''
+        for key in message['payload']:
+            if key == 'jsname' or key == 'data': continue
+            outstr += f', {key}={message["payload"][key]}'
+        outstr = outstr.lstrip(',').strip()
+        if 'data' in message['payload']:
+            outstr = message['payload']['data'] + outstr
+        if 'jsname' in message['payload']:
+            outstr = f'{message['payload']['jsname']} > {outstr}'
+        print_yellow(outstr)
     elif message['type'] == 'error':
-        print_red(message)
+        try:
+            print_red(f"{message['description']} in {message['fileName']} at line {message['lineNumber']}")
+            print_red(message['stack'])
+        except:
+            print_red(message)
     else:
         print(message)
 
@@ -94,13 +107,13 @@ def get_relative_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 if __name__ == '__main__':
-    description = '''
+    description = r'''
                        _____     _     _       
    ___  __ _ ___ _   _|  ___| __(_) __| | __ _ 
   / _ \/ _` / __| | | | |_ | '__| |/ _` |/ _` |
  |  __/ (_| \__ \ |_| |  _|| |  | | (_| | (_| |
   \___|\__,_|___/\__, |_|  |_|  |_|\__,_|\__,_|
-                 |___/                         Author: WXjzc'''
+                 |___/                         Author: WXjzc, sjh00'''
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,description=description)
     parser.add_argument('-R',action='store_true',help='使用远程连接方式')
     parser.add_argument('-S',type=str,default='',help='要附加的设备名(仅在连接了多台设备时需要)')
