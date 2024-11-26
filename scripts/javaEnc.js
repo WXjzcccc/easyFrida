@@ -13,10 +13,12 @@ var passclasskeyword = [
     "\.netease\.",
     "\.alipay\.",
     "\.blankj\.",
-    "\.bumptech\."
+    "\.bumptech\.",
+    "^com\.google\."
 ]; // 排除原生和无须关注的类名关键字
 var ignoreclasskeyword = [
-    "^com\.stub\.StubApp" // 加固解壳类名关键字
+    "^com\.stub\.StubApp", // 加固解壳类名关键字
+    "\.zip.+InputStream", // zip流类处理关键字
 ]; // 只要出现就全部忽略的类名关键字
 
 
