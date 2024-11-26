@@ -7,9 +7,10 @@ from hooks.hooks import *
 import rich
 import threading
 
+res_savepath = ''
 def onMessage(message,data):
+    outstr = ''
     if message['type'] == 'send':
-        outstr = ''
         if isinstance(message['payload'],dict):
             for key in message['payload']:
                 if key == 'jsname' or key == 'data': continue
@@ -24,12 +25,17 @@ def onMessage(message,data):
         print_yellow(outstr)
     elif message['type'] == 'error':
         try:
-            print_red(f"{message['description']} in {message['fileName']} at line {message['lineNumber']}")
-            print_red(message['stack'])
+            outstr = f"{message['description']} in {message['fileName']} at line {message['lineNumber']}\nmessage['stack']"
+            print_red(outstr)
         except:
-            print_red(message)
+            outstr = message
+            print_red(outstr)
     else:
-        print(message)
+        outstr = message
+        print(outstr)
+    if res_savepath: # 如果res_savepath不为空，则将结果追加进文件
+        with open(res_savepath,'a+',encoding='utf-8') as f:
+            f.write(outstr+'\n')
 
 def check_arg(arg):
     if arg is None or arg == '' or arg == False:
@@ -123,14 +129,15 @@ if __name__ == '__main__':
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-f',type=str,default='',help='要附加的应用包名')
     group.add_argument('-p',type=str,default='',help='要附加的进程名或进程ID')
-    parser.add_argument('--className',type=str,default='',help='执行脚本需要的类名(非强制，部分脚本可以添加该参数)')
-    parser.add_argument('--plugin',type=str,help='要执行的插件')
-    parser.add_argument('-l',action='store_true',help='列出支持的插件')
+    parser.add_argument('--className',type=str,default='',help='执行脚本需要的类名(可选，部分脚本可添加该参数)')
+    parser.add_argument('-l',type=str,help='要执行的插件')
+    parser.add_argument('--list',action='store_true',help='列出支持的插件')
+    parser.add_argument('-o',action='store_true',help='结果以utf8编码保存到本地output文件夹，默认不保存')
     args = parser.parse_args()
     rich.print(description)
     className = ''
     packageName = ''
-    if check_arg(args.l):
+    def list_plugins():
         lst = []
         idx = 0
         with open(get_relative_path('scripts/plugins.list'),'r',encoding='utf-8') as f:
@@ -141,6 +148,8 @@ if __name__ == '__main__':
                 lst.append({"序号":idx,"插件":name,"帮助":_help})
         print_dict(lst,lst[0],title='插件列表')
         sys.exit()
+    if check_arg(args.list):
+        list_plugins()
     if check_arg(args.S):
         device = get_device(args.S)
     else:
@@ -153,8 +162,8 @@ if __name__ == '__main__':
     if check_arg(args.p):
         pnameorid = args.p
         process = attach(device,pnameorid)
-    if check_arg(args.plugin):
-        plugin = args.plugin
+    if check_arg(args.l):
+        plugin = args.l
         if plugin == 'equals':
             my_func = hook_equals
             hook_equals(process,onMessage,className=className)
@@ -183,8 +192,13 @@ if __name__ == '__main__':
             my_func = hook_log
             hook_log(process)
     else:
-        print_red('请选择插件')
+        print_red('未指定插件, -h 查看帮助')
+        list_plugins()
         sys.exit()
+    if check_arg(args.o):
+        output_relative_path = get_relative_path("output")
+        os.makedirs(output_relative_path,exist_ok=True)
+        res_savepath = f"{output_relative_path}\\{packageName}_{plugin}.txt"
     in_data = sys.stdin.readline()
     if in_data in ['exit','quit']:
         sys.exit(0)
