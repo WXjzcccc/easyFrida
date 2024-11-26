@@ -12,12 +12,12 @@ def onMessage(message,data):
         outstr = ''
         for key in message['payload']:
             if key == 'jsname' or key == 'data': continue
-            outstr += f', {key}={message["payload"][key]}'
+            outstr += f", {key}={message['payload'][key]}"
         outstr = outstr.lstrip(',').strip()
         if 'data' in message['payload']:
             outstr = message['payload']['data'] + outstr
         if 'jsname' in message['payload']:
-            outstr = f'{message['payload']['jsname']} > {outstr}'
+            outstr = f"{message['payload']['jsname']} > {outstr}"
         print_yellow(outstr)
     elif message['type'] == 'error':
         try:
