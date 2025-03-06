@@ -133,6 +133,7 @@ if __name__ == '__main__':
     parser.add_argument('-l',type=str,help='要执行的插件')
     parser.add_argument('--list',action='store_true',help='列出支持的插件')
     parser.add_argument('-o',action='store_true',help='结果以utf8编码保存到本地output文件夹，默认不保存')
+    parser.add_argument('-m',action='store_true',help='是否函数名')
     args = parser.parse_args()
     rich.print(description)
     className = ''
@@ -162,6 +163,10 @@ if __name__ == '__main__':
     if check_arg(args.p):
         pnameorid = args.p
         process = attach(device,pnameorid)
+    if check_arg(args.m):
+        isMethod = True
+    else:
+        isMethod = False
     if check_arg(args.l):
         plugin = args.l
         if plugin == 'equals':
@@ -191,6 +196,9 @@ if __name__ == '__main__':
         elif plugin == 'log':
             my_func = hook_log
             hook_log(process)
+        elif plugin == 'tracer':
+            myfunc = tarcer
+            tarcer(process,className,isMethod)
     else:
         print_red('未指定插件, -h 查看帮助')
         list_plugins()

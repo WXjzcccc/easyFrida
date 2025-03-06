@@ -178,3 +178,19 @@ def soFile(process,onMessage=''):
     script = process.create_script(jsCode)
     script.on('message',fileMessage)
     script.load()
+
+def tarcer(process,className,isMethod):
+    with open(get_relative_path('../scripts/tracer.js'),'r',encoding='utf8') as fr:
+        jsCode = fr.read()
+    script = process.create_script(jsCode)
+    script.on('message',tracerMessage)
+    script.load()
+    script.post([className,isMethod])
+
+def tracerMessage(message,data):
+    if message['type'] == 'send':
+        payload = message['payload']
+        if type(payload) == dict and 'stack' in payload.keys():
+            print_yellow(payload)
+    else:
+        print_red(message)

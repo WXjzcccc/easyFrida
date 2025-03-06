@@ -207,8 +207,6 @@ function _sqlite() {
 
 
 function main(){
-    var classes = ["net.sqlcipher.database.SQLiteOpenHelper","net.zetetic.database.sqlcipher.SQLiteDatabase","com.tencent.wcdb.database.SQLiteDatabase","android.database.sqlite.SQLiteDatabase"];
-    var funs = [netSqlcipher,zeteticSQLCipher,wcdb,_sqlite];
     hookLoadClass();
 }
 

@@ -7,3 +7,4 @@ database Java层操作sqlcipher时使用的密钥(等待不断完善)
 share 看看从SharedPreferences中读取了哪些数据
 sofileopen 看看so打开了哪些文件
 log 查看java层和so层输出的日志
+tracer 查看指定类或方法的调用堆栈
