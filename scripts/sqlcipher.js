@@ -30,13 +30,13 @@ function findClassLoader(){
             onMatch : function(loader){
                 try {
                     for(var clazz of Object.keys(targetClasses)){
-                        if(loader.findClass(clazz)){
+                        try{
+                            loader.findClass(clazz);
                             Java.classFactory.loader = loader;
                             loaderFlag = true;
                             targetClasses[clazz]["flag"] = true;
                             break;
-                            // console.log(`Class ${clazz} found! ClassLoader${loader}`);
-                        }
+                        }catch (error){}
                     }
                 } catch (error) {
                     

@@ -11,11 +11,10 @@ function findClassLoader(classPath) {
         Java.enumerateClassLoaders({
             onMatch: function (loader) {
                 try {
-                    if (loader.findClass(classPath)) {
-                        Java.classFactory.loader = loader;
-                        loaderFlag = true;
-                        // console.log(`Class ${clazz} found! ClassLoader${loader}`);
-                    }
+                    loader.findClass(classPath)
+                    Java.classFactory.loader = loader;
+                    loaderFlag = true;
+                    // console.log(`Class ${clazz} found! ClassLoader${loader}`);
                 } catch (error) {
 
                 }
