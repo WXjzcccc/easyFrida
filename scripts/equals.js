@@ -1,5 +1,4 @@
-setImmediate(function () {
-    Java.perform(function () {
+(() => {
         function getStacks() {
             var Thread = Java.use("java.lang.Thread");
             var currentThread = Thread.currentThread();
@@ -27,7 +26,7 @@ setImmediate(function () {
             return false
         }
 
-        // 获取调用equals的方法包路径，用于判断类
+// 获取调用equals的方法包路径，用于判断类
         function getClassName() {
             var stackTrace = getStacks();
             return stackTrace[1].toString()
@@ -38,49 +37,71 @@ setImmediate(function () {
             string['equals'].implementation = function (arg) {
                 if (className == '') {
                     if (!isDefault()) {
-                        send('"' + this + '".equals("' + arg + '")')
+                        var message = {};
+                        message["jsname"] = "equals.js";
+                        message["data"] = '"' + this + '".equals("' + arg + '")';
+                        send(message)
                     }
                 }
                 if (className != '' && getClassName().indexOf(className) == 0) {
-                    send('"' + this + '".equals("' + arg + '")')
-                }
-                else if (className != '' && (this==className.toString() | arg==className.toString())) {
-                    send('"' + this + '".equals("' + arg + '")')
+                    var message = {};
+                    message["jsname"] = "equals.js";
+                    message["data"] = '"' + this + '".equals("' + arg + '")';
+                    send(message)
+                } else if (className != '' && (this == className.toString() | arg == className.toString())) {
+                    var message = {};
+                    message["jsname"] = "equals.js";
+                    message["data"] = '"' + this + '".equals("' + arg + '")';
+                    send(message)
                 }
                 let ret = this['equals'](arg);
                 return ret
             }
-            
+
         }
 
-        function hook_equalsIgnoreCase(className='') {
+        function hook_equalsIgnoreCase(className = '') {
             let string = Java.use("java.lang.String")
             string['equalsIgnoreCase'].implementation = function (arg) {
                 if (className == '') {
                     if (!isDefault()) {
-                        send('"' + this + '".equalsIgnoreCase("' + arg + '")')
+                        var message = {};
+                        message["jsname"] = "equals.js";
+                        message["data"] = '"' + this + '".equalsIgnoreCase("' + arg + '")';
+                        send(message)
                     }
                 }
                 if (className != '' && getClassName().indexOf(className) == 0) {
-                    send('"' + this + '".equalsIgnoreCase("' + arg + '")')
-                }
-                else if (className != '' && (this==className.toString() | arg==className.toString())) {
-                    send('"' + this + '".equalsIgnoreCase("' + arg + '")')
+                    var message = {};
+                    message["jsname"] = "equals.js";
+                    message["data"] = '"' + this + '".equalsIgnoreCase("' + arg + '")';
+                    send(message)
+                } else if (className != '' && (this == className.toString() | arg == className.toString())) {
+                    var message = {};
+                    message["jsname"] = "equals.js";
+                    message["data"] = '"' + this + '".equalsIgnoreCase("' + arg + '")';
+                    send(message)
                 }
                 let ret = this['equalsIgnoreCase'](arg);
                 return ret
             }
         }
 
-        recv(function (className) {
-            if (className != '') {
-                hook_equals(className);
-                hook_equalsIgnoreCase(className);
-            } else {
-                hook_equals();
-                hook_equalsIgnoreCase();
-            }
-        })
+        function hookEquals() {
+            recv(function (args) {
+                var className = args[0];
+                if (className != '') {
+                    hook_equals(className);
+                    hook_equalsIgnoreCase(className);
+                } else {
+                    hook_equals();
+                    hook_equalsIgnoreCase();
+                }
+            })
+        }
 
-    });
-})
+        Java.perform(() => {
+            hookEquals();
+        })
+    }
+)();

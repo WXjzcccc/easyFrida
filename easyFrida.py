@@ -8,18 +8,50 @@ import rich
 import threading
 
 res_savepath = ''
+def num_to_ip(num):
+    parts = [num >> 24 & 0xff, num >> 16 & 0xff, num >> 8 & 0xff, num & 0xff]
+    return ".".join(map(str, parts))
+def find_all_occurrences(string, char):
+    positions = []
+    for i in range(len(string)):
+        if string[i] == char:
+            positions.append(i)
+    return positions
 def onMessage(message,data):
     outstr = ''
     if message['type'] == 'send':
-        if isinstance(message['payload'],dict):
+        if isinstance(message['payload'],dict) and 'jsname' in message['payload']:
             for key in message['payload']:
                 if key == 'jsname' or key == 'data': continue
                 outstr += f", {key}={message['payload'][key]}"
             outstr = outstr.lstrip(',').strip()
-            if 'data' in message['payload']:
-                outstr = message['payload']['data'] + outstr
-            if 'jsname' in message['payload']:
-                outstr = f"{message['payload']['jsname']} > {outstr}"
+            jsname = message['payload']['jsname']
+            mdata = message['payload']['data'] if 'data' in message['payload'].keys() else {}
+            payload = message['payload']
+            if jsname == 'r0capture.js':
+                if 'src_addr' in payload.keys():
+                    payload['src_addr'] = num_to_ip(payload['src_addr'])
+                    payload['dst_addr'] = num_to_ip(payload['dst_addr'])
+                payload['bdata'] = data
+                outstr += f'\n{jsname} --> {str(payload)}\n'
+            elif jsname == 'sqlcipher.js':
+                if type(payload) == dict and 'type' in payload.keys():
+                    if payload['type'] == 'sql':
+                        sql = payload['sql']
+                        args = payload['args']
+                        positions = find_all_occurrences(sql, '?')
+                        tmp = list(sql)
+                        for i in range(len(positions)):
+                            tmp[positions[i]] = args[i]
+                        sql = ''.join(tmp)
+                        outstr+=f'↓↓↓↓↓↓↓↓↓↓↓执行了sql↓↓↓↓↓↓↓↓↓↓↓\n'
+                        outstr+=f"\n{jsname} --> {sql}"
+                        outstr+=f'↑↑↑↑↑↑↑↑↑↑↑执行了sql↑↑↑↑↑↑↑↑↑↑↑\n'
+                else:
+                    outstr += f"\n{jsname} --> {payload}"
+            else:
+                outstr += str(mdata)
+                outstr = f"\n{jsname} --> {outstr}"
         else:
             outstr = message['payload']
         print_yellow(outstr)
@@ -64,7 +96,7 @@ def spawn(device,package_name):
 
 my_func = None
 
-def spawnNew(device,package_name):
+def spawnNew(device,package_name,plugin_list=[],onMessage=None,className='',isMethod=None):
     pending = []
     sessions = []
     scripts = []
@@ -74,7 +106,7 @@ def spawnNew(device,package_name):
         event.set()
         if(spawn.identifier.startswith(package_name)):
             session = device.attach(spawn.pid)
-            my_func(session,onMessage)
+            hookAll(plugin_list,session,onMessage,className,isMethod)
             device.resume(spawn.pid)
     def on_spawned(spawn):
         print('on_spawned:', spawn)
@@ -138,6 +170,8 @@ if __name__ == '__main__':
     rich.print(description)
     className = ''
     packageName = ''
+    isMethod = None
+    plugin_list = []
     def list_plugins():
         lst = []
         idx = 0
@@ -157,9 +191,6 @@ if __name__ == '__main__':
         device = get_device()
     if check_arg(args.className):
         className = args.className
-    if check_arg(args.f):
-        packageName = args.f
-        device,process,pid = spawnNew(device,packageName)
     if check_arg(args.p):
         pnameorid = args.p
         process = attach(device,pnameorid)
@@ -169,40 +200,18 @@ if __name__ == '__main__':
         isMethod = False
     if check_arg(args.l):
         plugin = args.l
-        if plugin == 'equals':
-            my_func = hook_equals
-            hook_equals(process,onMessage,className=className)
-        elif plugin == 'strcmp':
-            my_func = hook_strcmp
-            hook_strcmp(process,onMessage,className=className)
-        elif plugin == 'r0capture':
-            my_func = r0capture
-            r0capture(process)
-        elif plugin == 'javaEnc':
-            my_func = javaEnc
-            javaEnc(process,onMessage)
-        elif plugin == 'event':
-            my_func = hook_event
-            hook_event(process,onMessage)
-        elif plugin == 'database':
-            my_func = sqlcipher
-            sqlcipher(process)
-        elif plugin == 'share':
-            my_func = shareP
-            shareP(process)
-        elif plugin == 'sofileopen':
-            my_func = soFile
-            soFile(process)
-        elif plugin == 'log':
-            my_func = hook_log
-            hook_log(process)
-        elif plugin == 'tracer':
-            myfunc = tarcer
-            tarcer(process,className,isMethod)
+        if plugin.__contains__(','):
+            plugin_list = plugin.split(',')
+        else:
+            plugin_list.append(plugin)
     else:
         print_red('未指定插件, -h 查看帮助')
         list_plugins()
         sys.exit()
+    if check_arg(args.f):
+        packageName = args.f
+        device,process,pid = spawnNew(device,packageName,plugin_list,onMessage,className,isMethod)
+    hookAll(plugin_list,process,onMessage,className,isMethod)
     if check_arg(args.o):
         output_relative_path = get_relative_path("output")
         os.makedirs(output_relative_path,exist_ok=True)
