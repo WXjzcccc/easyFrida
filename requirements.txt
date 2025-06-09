@@ -1,2 +1,2 @@
-frida
-rich
+frida==16.1.4
+rich==13.7.0
