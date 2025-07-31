@@ -46,21 +46,18 @@
     function preventRuntimeExit() {
         let runtime = Java.use("java.lang.Runtime");
         runtime.exit.implementation = function (code) {
-            klog(`Runtime.exit(${code}) is prevented`);
         }
     }
 
     function preventSystemExit() {
         let system = Java.use("java.lang.System");
         system.exit.implementation = function (code) {
-            klog(`System.exit(${code}) is prevented`);
         }
     }
 
     function preventProcessKill() {
         let process = Java.use("android.os.Process");
         process.killProcess.implementation = function (pid) {
-            klog(`Process.killProcess(${pid}) is prevented`);
         }
     }
 
@@ -83,7 +80,6 @@
         UnixFileSystem.checkAccess.implementation = function (file, mode) {
             var fileName = file.getAbsolutePath();
             if (checkStringContainsSu(fileName)) {
-                klog(`Access to ${fileName} is prevented due to su/root/magisk/frida string`);
                 return false;
             }
             return this.checkAccess(file, mode);
@@ -93,7 +89,6 @@
         File.exists.implementation = function () {
             var fileName = this.getPath();
             if (checkStringContainsSu(fileName)) {
-                klog(`File.exists() for ${fileName} is prevented due to su/root/magisk/frida string`);
                 return false;
             }
             return this.exists();
@@ -108,7 +103,6 @@
             },
             onLeave: function (retval) {
                 if (checkStringContainsSu(this.fileName)) {
-                    klog(`fopen() for ${this.fileName} is prevented due to su/root/magisk/frida string`);
                     retval.replace(ptr(0x0));
                 }
             }
@@ -122,7 +116,6 @@
                 if (cmd == "su" || cmd == "sudo") {
                     var fakeCmd = cmds.slice();
                     fakeCmd[0] = "echo";
-                    klog(`Runtime.exec() is prevented for command: ${cmds}`);
                     return this.exec(fakeCmd);
                 }
             }
@@ -139,14 +132,12 @@
         let string = Java.use("java.lang.String")
         string['equals'].implementation = function (arg) {
             if (checkStringContainsSu(arg) || checkStringContainsSu(this.toString())) {
-                klog(`${this}.equals(${arg}) is prevented due to su/root/magisk/frida string`);
                 return false;
             }
             return this.equals(arg);
         }
         string['equalsIgnoreCase'].implementation = function (arg) {
             if (checkStringContainsSu(arg) || checkStringContainsSu(this.toString())) {
-                klog(`${this}.equals(${arg}) is prevented due to su/root/magisk/frida string`);
                 return false;
             }
             return this.equals(arg);
@@ -162,7 +153,6 @@
             },
             onLeave: function (retval) {
                 if (checkStringContainsSu(this.arg0) || checkStringContainsSu(this.arg1)) {
-                    klog(`strcmp(${this.arg0}, ${this.arg1}) is prevented due to su/root/magisk/frida string`);
                     retval.replace(1);
                 }
             }
@@ -175,7 +165,6 @@
             },
             onLeave: function (retval) {
                 if (checkStringContainsSu(this.arg0) || checkStringContainsSu(this.arg1)) {
-                    klog(`strncmp(${this.arg0}, ${this.arg1}) is prevented due to su/root/magisk/frida string`);
                     retval.replace(1);
                 }
             }
@@ -188,7 +177,6 @@
             },
             onLeave: function (retval) {
                 if (checkStringContainsSu(this.arg0) || checkStringContainsSu(this.arg1)) {
-                    klog(`strstr(${this.arg0}, ${this.arg1}) is prevented due to su/root/magisk/frida string`);
                     retval.replace(ptr(0x0));
                 }
             }
