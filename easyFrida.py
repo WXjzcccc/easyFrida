@@ -6,6 +6,7 @@ from tools.PrintTool import print_yellow,print_red,print_green,print_dict
 from hooks.hooks import *
 import rich
 import threading
+import json
 
 res_savepath = ''
 def num_to_ip(num):
@@ -164,7 +165,7 @@ if __name__ == '__main__':
     parser.add_argument('--className',type=str,default='',help='执行脚本需要的类名(可选，部分脚本可添加该参数)')
     parser.add_argument('-l',type=str,help='要执行的插件')
     parser.add_argument('--list',action='store_true',help='列出支持的插件')
-    parser.add_argument('-o',action='store_true',help='结果以utf8编码保存到本地output文件夹，默认不保存')
+    parser.add_argument('-o',default='',help='结果以utf8编码保存到本地output文件夹，默认不保存')
     parser.add_argument('-m',action='store_true',help='是否函数名')
     args = parser.parse_args()
     rich.print(description)
@@ -175,12 +176,12 @@ if __name__ == '__main__':
     def list_plugins():
         lst = []
         idx = 0
-        with open(get_relative_path('scripts/plugins.list'),'r',encoding='utf-8') as f:
-            for line in f.readlines():
-                name = line.split(' ')[0]
-                _help = line.split(' ')[1].strip()
+        with open(get_relative_path('scripts/plugins.json'),'r',encoding='utf-8') as f:
+            plugin = json.load(f)
+            for name in plugin.keys():
+                description = plugin[name]['description']
                 idx += 1
-                lst.append({"序号":idx,"插件":name,"帮助":_help})
+                lst.append({"序号":idx,"插件":name,"帮助":description})
         print_dict(lst,lst[0],title='插件列表')
         sys.exit()
     if check_arg(args.list):
@@ -213,9 +214,9 @@ if __name__ == '__main__':
         device,process,pid = spawnNew(device,packageName,plugin_list,onMessage,className,isMethod)
     hookAll(plugin_list,process,onMessage,className,isMethod)
     if check_arg(args.o):
-        output_relative_path = get_relative_path("output")
-        os.makedirs(output_relative_path,exist_ok=True)
-        res_savepath = f"{output_relative_path}\\{packageName}_{plugin}.txt"
+        output_path = args.o
+        os.makedirs(output_path,exist_ok=True)
+        res_savepath = f"{output_path}\\{packageName}_{plugin}.txt"
     in_data = sys.stdin.readline()
     if in_data in ['exit','quit']:
         sys.exit(0)
